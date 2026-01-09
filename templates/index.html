@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shadow English - Sentence by Sentence Practice</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        min-height: 100vh;
+        color: #fff;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      header {
+        text-align: center;
+        padding: 30px 0;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        color: #888;
+        font-size: 1.1rem;
+      }
+
+      .upload-section {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .upload-group {
+        margin-bottom: 20px;
+      }
+
+      .upload-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 500;
+        color: #00d4ff;
+      }
+
+      .file-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .file-input-wrapper input[type="file"] {
+        display: none;
+      }
+
+      .file-btn {
+        background: linear-gradient(135deg, #7b2cbf 0%, #00d4ff 100%);
+        color: white;
+        padding: 12px 25px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .file-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+      }
+
+      .file-name {
+        color: #888;
+        font-size: 0.9rem;
+      }
+
+      .process-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #00d4ff 0%, #7b2cbf 100%);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-top: 10px;
+      }
+
+      .process-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 30px rgba(0, 212, 255, 0.4);
+      }
+
+      .process-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 40px;
+      }
+
+      .loading.active {
+        display: block;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-top-color: #00d4ff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .results-section {
+        display: none;
+      }
+
+      .results-section.active {
+        display: block;
+      }
+
+      .audio-player {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .audio-player audio {
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .playback-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+      }
+
+      .speed-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .speed-control label {
+        color: #888;
+        font-size: 0.9rem;
+      }
+
+      .speed-control select {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .sentences-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .sentence-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .sentence-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(0, 212, 255, 0.3);
+      }
+
+      .sentence-card.playing {
+        background: rgba(0, 212, 255, 0.1);
+        border-color: #00d4ff;
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+      }
+
+      .sentence-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .sentence-number {
+        background: linear-gradient(135deg, #7b2cbf 0%, #00d4ff 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .sentence-time {
+        color: #888;
+        font-size: 0.85rem;
+        font-family: monospace;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .time-input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #00d4ff;
+        padding: 4px 8px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        width: 85px;
+        text-align: center;
+      }
+
+      .time-input:focus {
+        outline: none;
+        border-color: #00d4ff;
+        background: rgba(0, 212, 255, 0.1);
+      }
+
+      .time-separator {
+        color: #888;
+      }
+
+      .sentence-text {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        margin-bottom: 15px;
+        color: #e0e0e0;
+      }
+
+      .sentence-text-input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 1.2rem;
+        line-height: 1.6;
+        margin-bottom: 15px;
+        font-family: inherit;
+        resize: none;
+        overflow-y: hidden;
+        min-height: 50px;
+        box-sizing: border-box;
+      }
+
+      .sentence-text-input:focus {
+        outline: none;
+        border-color: #00d4ff;
+        background: rgba(0, 212, 255, 0.1);
+      }
+
+      .sentence-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .play-btn {
+        background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+      }
+
+      .play-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+      }
+
+      .play-btn.playing {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+      }
+
+      .loop-btn {
+        background: rgba(123, 44, 191, 0.3);
+        color: #c9a0ff;
+        border: 1px solid rgba(123, 44, 191, 0.5);
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .loop-btn:hover {
+        background: rgba(123, 44, 191, 0.5);
+      }
+
+      .loop-btn.active {
+        background: #7b2cbf;
+        color: white;
+      }
+
+      .error-message {
+        background: rgba(255, 107, 107, 0.2);
+        border: 1px solid rgba(255, 107, 107, 0.5);
+        color: #ff6b6b;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: none;
+      }
+
+      .error-message.active {
+        display: block;
+      }
+
+      .warning-message {
+        background: rgba(255, 193, 7, 0.2);
+        border: 1px solid rgba(255, 193, 7, 0.5);
+        color: #ffc107;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+
+      .info-text {
+        color: #888;
+        font-size: 0.85rem;
+        margin-top: 8px;
+      }
+
+      .reset-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: #888;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+        margin-bottom: 20px;
+      }
+
+      .reset-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+
+      /* Icons */
+      .icon-play::before {
+        content: "▶";
+      }
+      .icon-pause::before {
+        content: "⏸";
+      }
+      .icon-loop::before {
+        content: "🔁";
+      }
+
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        .sentence-text {
+          font-size: 1rem;
+        }
+
+        .container {
+          padding: 15px;
+        }
+      }
+
+      /* Scroll to top button */
+      .scroll-top-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #7b2cbf 0%, #00d4ff 100%);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        transition: all 0.3s ease;
+        opacity: 0;
+        visibility: hidden;
+        z-index: 1000;
+      }
+
+      .scroll-top-btn.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .scroll-top-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 212, 255, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🎧 Shadow English</h1>
+        <p class="subtitle">
+          Practice speaking sentence by sentence with AI-powered transcription
+        </p>
+      </header>
+
+      <div class="error-message" id="errorMessage"></div>
+
+      <section class="upload-section" id="uploadSection">
+        <div class="upload-group">
+          <label>🎵 Audio File (Required)</label>
+          <div class="file-input-wrapper">
+            <label class="file-btn" for="audioInput">Choose Audio File</label>
+            <input
+              type="file"
+              id="audioInput"
+              accept=".mp3,.wav,.mp4,.m4a,.ogg,.flac,.webm"
+            />
+            <span class="file-name" id="audioFileName">No file selected</span>
+          </div>
+          <p class="info-text">
+            Supported formats: MP3, WAV, MP4, M4A, OGG, FLAC, WebM
+          </p>
+        </div>
+
+        <div class="upload-group">
+          <label>📝 Script File (Optional)</label>
+          <div class="file-input-wrapper">
+            <label class="file-btn" for="scriptInput">Choose Script File</label>
+            <input type="file" id="scriptInput" accept=".txt" />
+            <span class="file-name" id="scriptFileName">No file selected</span>
+          </div>
+          <p class="info-text">
+            Optional: TXT file with one sentence per line. If not provided,
+            Whisper will generate the transcript.
+          </p>
+        </div>
+
+        <button class="process-btn" id="processBtn" disabled>
+          🚀 Process Audio with Whisper AI
+        </button>
+      </section>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Processing audio with Whisper AI...</p>
+        <p class="info-text">
+          This may take a moment depending on the audio length
+        </p>
+      </div>
+
+      <section class="results-section" id="resultsSection">
+        <button class="reset-btn" id="resetBtn">← Upload New Audio</button>
+
+        <div class="audio-player">
+          <label>🔊 Full Audio Player</label>
+          <audio id="mainAudio" controls></audio>
+          <div class="playback-controls">
+            <div class="speed-control">
+              <label>Playback Speed:</label>
+              <select id="speedControl">
+                <option value="0.5">0.5x (Slow)</option>
+                <option value="0.75">0.75x</option>
+                <option value="1" selected>1x (Normal)</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x (Fast)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="warningMessage"></div>
+
+        <h2 style="margin-bottom: 20px; color: #00d4ff">📜 Sentences</h2>
+        <div class="sentences-list" id="sentencesList"></div>
+      </section>
+    </div>
+
+    <!-- Scroll to top button -->
+    <button class="scroll-top-btn" id="scrollTopBtn" title="Scroll to top">
+      ↑
+    </button>
+
+    <script>
+      // DOM Elements
+      const audioInput = document.getElementById("audioInput");
+      const scriptInput = document.getElementById("scriptInput");
+      const audioFileName = document.getElementById("audioFileName");
+      const scriptFileName = document.getElementById("scriptFileName");
+      const processBtn = document.getElementById("processBtn");
+      const uploadSection = document.getElementById("uploadSection");
+      const loading = document.getElementById("loading");
+      const resultsSection = document.getElementById("resultsSection");
+      const mainAudio = document.getElementById("mainAudio");
+      const speedControl = document.getElementById("speedControl");
+      const sentencesList = document.getElementById("sentencesList");
+      const errorMessage = document.getElementById("errorMessage");
+      const warningMessage = document.getElementById("warningMessage");
+      const resetBtn = document.getElementById("resetBtn");
+
+      // State
+      let currentPlayingCard = null;
+      let currentPlayingIndex = null;
+      let loopingSentence = null;
+      let sentences = [];
+      let loopDelay = 1000; // 1 second delay between loops
+
+      // File input handlers
+      audioInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          audioFileName.textContent = file.name;
+          processBtn.disabled = false;
+        } else {
+          audioFileName.textContent = "No file selected";
+          processBtn.disabled = true;
+        }
+      });
+
+      scriptInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        scriptFileName.textContent = file ? file.name : "No file selected";
+      });
+
+      // Speed control
+      speedControl.addEventListener("change", (e) => {
+        mainAudio.playbackRate = parseFloat(e.target.value);
+      });
+
+      // Process button
+      processBtn.addEventListener("click", async () => {
+        const audioFile = audioInput.files[0];
+        if (!audioFile) return;
+
+        showError("");
+        uploadSection.style.display = "none";
+        loading.classList.add("active");
+
+        const formData = new FormData();
+        formData.append("audio", audioFile);
+
+        const scriptFile = scriptInput.files[0];
+        if (scriptFile) {
+          formData.append("script", scriptFile);
+        }
+
+        try {
+          const response = await fetch("/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to process audio");
+          }
+
+          if (data.success) {
+            sentences = data.sentences;
+            mainAudio.src = data.audio_url;
+
+            // Show warning if exists
+            if (data.warning) {
+              warningMessage.innerHTML = `<div class="warning-message">${data.warning}</div>`;
+            } else {
+              warningMessage.innerHTML = "";
+            }
+
+            renderSentences();
+            loading.classList.remove("active");
+            resultsSection.classList.add("active");
+          }
+        } catch (error) {
+          loading.classList.remove("active");
+          uploadSection.style.display = "block";
+          showError(error.message);
+        }
+      });
+
+      // Reset button
+      resetBtn.addEventListener("click", () => {
+        resultsSection.classList.remove("active");
+        uploadSection.style.display = "block";
+        audioInput.value = "";
+        scriptInput.value = "";
+        audioFileName.textContent = "No file selected";
+        scriptFileName.textContent = "No file selected";
+        processBtn.disabled = true;
+        sentencesList.innerHTML = "";
+        sentences = [];
+        loopingSentence = null;
+      });
+
+      // Show error message
+      function showError(message) {
+        if (message) {
+          errorMessage.textContent = message;
+          errorMessage.classList.add("active");
+        } else {
+          errorMessage.classList.remove("active");
+        }
+      }
+
+      // Format time as MM:SS.ms
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = (seconds % 60).toFixed(2);
+        return `${mins.toString().padStart(2, "0")}:${secs.padStart(5, "0")}`;
+      }
+
+      // Parse time string (MM:SS.ms) to seconds
+      function parseTime(timeStr) {
+        const parts = timeStr.split(":");
+        if (parts.length === 2) {
+          const mins = parseInt(parts[0]) || 0;
+          const secs = parseFloat(parts[1]) || 0;
+          return mins * 60 + secs;
+        }
+        return parseFloat(timeStr) || 0;
+      }
+
+      // Render sentences
+      function renderSentences() {
+        sentencesList.innerHTML = "";
+
+        sentences.forEach((sentence, index) => {
+          const card = document.createElement("div");
+          card.className = "sentence-card";
+          card.dataset.id = sentence.id;
+          card.dataset.index = index;
+
+          card.innerHTML = `
+                    <div class="sentence-header">
+                        <span class="sentence-number">#${index + 1}</span>
+                        <div class="sentence-time">
+                            <input type="text" class="time-input start-time" value="${formatTime(
+                              sentence.start
+                            )}" data-index="${index}" title="Start time (MM:SS.ms)">
+                            <span class="time-separator">-</span>
+                            <input type="text" class="time-input end-time" value="${formatTime(
+                              sentence.end
+                            )}" data-index="${index}" title="End time (MM:SS.ms)">
+                        </div>
+                    </div>
+                    <textarea class="sentence-text-input" data-index="${index}" rows="2">${
+            sentence.text
+          }</textarea>
+                    <div class="sentence-controls">
+                        <button class="play-btn" data-index="${index}">
+                            <span class="icon-play"></span> Play
+                        </button>
+                        <button class="loop-btn" data-index="${index}">
+                            <span class="icon-loop"></span> Loop
+                        </button>
+                    </div>
+                `;
+
+          sentencesList.appendChild(card);
+        });
+
+        // Add event listeners to play buttons
+        document.querySelectorAll(".play-btn").forEach((btn) => {
+          btn.addEventListener("click", () => playSentence(btn));
+        });
+
+        // Add event listeners to loop buttons
+        document.querySelectorAll(".loop-btn").forEach((btn) => {
+          btn.addEventListener("click", () => toggleLoop(btn));
+        });
+
+        // Add event listeners to text inputs
+        document.querySelectorAll(".sentence-text-input").forEach((input) => {
+          // Auto-resize on input
+          input.addEventListener("input", (e) => {
+            autoResizeTextarea(e.target);
+          });
+
+          input.addEventListener("change", (e) => {
+            const index = parseInt(e.target.dataset.index);
+            sentences[index].text = e.target.value;
+          });
+        });
+
+        // Auto-resize all textareas after a small delay to ensure DOM is rendered
+        setTimeout(() => {
+          resizeAllTextareas();
+        }, 50);
+
+        // Add event listeners to time inputs
+        document.querySelectorAll(".start-time").forEach((input) => {
+          input.addEventListener("change", (e) => {
+            const index = parseInt(e.target.dataset.index);
+            sentences[index].start = parseTime(e.target.value);
+            e.target.value = formatTime(sentences[index].start);
+          });
+        });
+
+        document.querySelectorAll(".end-time").forEach((input) => {
+          input.addEventListener("change", (e) => {
+            const index = parseInt(e.target.dataset.index);
+            sentences[index].end = parseTime(e.target.value);
+            e.target.value = formatTime(sentences[index].end);
+          });
+        });
+      }
+
+      // Play a specific sentence
+      function playSentence(btn) {
+        const index = parseInt(btn.dataset.index);
+        const sentence = sentences[index];
+        const start = sentence.start;
+        const end = sentence.end;
+        const card = btn.closest(".sentence-card");
+
+        // Remove playing state from other cards
+        document
+          .querySelectorAll(".sentence-card")
+          .forEach((c) => c.classList.remove("playing"));
+        document.querySelectorAll(".play-btn").forEach((b) => {
+          b.classList.remove("playing");
+          b.innerHTML = '<span class="icon-play"></span> Play';
+        });
+
+        // If clicking the same button that's playing, stop
+        if (currentPlayingCard === card && !mainAudio.paused) {
+          mainAudio.pause();
+          currentPlayingCard = null;
+          return;
+        }
+
+        // Play the sentence
+        card.classList.add("playing");
+        btn.classList.add("playing");
+        btn.innerHTML = '<span class="icon-pause"></span> Pause';
+        currentPlayingCard = card;
+        currentPlayingIndex = index;
+
+        mainAudio.currentTime = start;
+        mainAudio.play();
+
+        // Stop at end of sentence (unless looping)
+        const checkEnd = () => {
+          // Re-read the current end time in case it was edited
+          const currentEnd = sentences[index].end;
+          const currentStart = sentences[index].start;
+          if (mainAudio.currentTime >= currentEnd) {
+            if (loopingSentence && loopingSentence.index === index) {
+              // Add delay before looping
+              mainAudio.pause();
+              setTimeout(() => {
+                if (loopingSentence && loopingSentence.index === index) {
+                  mainAudio.currentTime = currentStart;
+                  mainAudio.play();
+                }
+              }, loopDelay);
+            } else {
+              mainAudio.pause();
+              card.classList.remove("playing");
+              btn.classList.remove("playing");
+              btn.innerHTML = '<span class="icon-play"></span> Play';
+              currentPlayingCard = null;
+            }
+          }
+        };
+
+        mainAudio.ontimeupdate = checkEnd;
+      }
+
+      // Toggle loop for a sentence
+      function toggleLoop(btn) {
+        const index = parseInt(btn.dataset.index);
+
+        // Remove active state from all loop buttons
+        document
+          .querySelectorAll(".loop-btn")
+          .forEach((b) => b.classList.remove("active"));
+
+        if (loopingSentence && loopingSentence.index === index) {
+          // Turn off looping
+          loopingSentence = null;
+        } else {
+          // Turn on looping for this sentence
+          loopingSentence = { index };
+          btn.classList.add("active");
+
+          // Start playing if not already
+          const playBtn = btn.previousElementSibling;
+          const sentence = sentences[index];
+          if (
+            mainAudio.paused ||
+            mainAudio.currentTime < sentence.start ||
+            mainAudio.currentTime > sentence.end
+          ) {
+            playSentence(playBtn);
+          }
+        }
+      }
+
+      // Handle audio ended
+      mainAudio.addEventListener("ended", () => {
+        document
+          .querySelectorAll(".sentence-card")
+          .forEach((c) => c.classList.remove("playing"));
+        document.querySelectorAll(".play-btn").forEach((b) => {
+          b.classList.remove("playing");
+          b.innerHTML = '<span class="icon-play"></span> Play';
+        });
+        currentPlayingCard = null;
+      });
+
+      // Scroll to top button
+      const scrollTopBtn = document.getElementById("scrollTopBtn");
+
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 300) {
+          scrollTopBtn.classList.add("visible");
+        } else {
+          scrollTopBtn.classList.remove("visible");
+        }
+      });
+
+      scrollTopBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      // Auto-resize textarea function
+      function autoResizeTextarea(textarea) {
+        // Reset height to auto to get the correct scrollHeight
+        textarea.style.height = "auto";
+        // Set height to scrollHeight + some padding
+        const newHeight = Math.max(50, textarea.scrollHeight);
+        textarea.style.height = newHeight + "px";
+      }
+
+      // Call auto-resize after DOM is ready for all textareas
+      function resizeAllTextareas() {
+        document
+          .querySelectorAll(".sentence-text-input")
+          .forEach((textarea) => {
+            autoResizeTextarea(textarea);
+          });
+      }
+    </script>
+  </body>
+</html>
